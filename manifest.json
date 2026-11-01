@@ -1,0 +1,9 @@
+{
+  "id": "graphite-vault-chat",
+  "name": "Graphite",
+  "version": "0.1.0",
+  "minAppVersion": "1.11.4",
+  "description": "Chat with your vault. Every claim in an answer carries a quote checked against the note it cites. Bring your own AI provider.",
+  "author": "Charan Sandaka",
+  "isDesktopOnly": true
+}
