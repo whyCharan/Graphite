@@ -7,7 +7,10 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc --noEmit && node esbuild.config.mjs production",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval:vault": "node eval/run.mjs eval/generate-test-vault.ts",
+    "eval:retrieval": "node eval/run.mjs eval/run-retrieval.ts",
+    "eval:benchmark": "node eval/run.mjs eval/benchmark.ts"
   },
   "author": "Charan Sandaka",
   "license": "MIT",

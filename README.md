@@ -4,9 +4,22 @@ Chat with your Obsidian vault. Every claim in an answer carries an exact quote, 
 
 ## Status
 
-Early development. Version 0.1 is being built and is **not usable yet**.
+Early development. Version 0.1 is being built and is **not usable yet**. There is no release to install.
 
-What exists today is the plugin skeleton: it loads in Obsidian, registers a ribbon icon and a command, and opens an empty side panel. Search, AI answers and provider settings are not built yet. There is no release to install.
+Local search, the quote check, the answer pipeline and two of the three providers are written and unit tested. None of it has been verified running inside Obsidian, and no answer has been produced through a live provider, so treat every figure below as measured on the search core alone.
+
+Measured against the 50-note corpus in `test-vault/` and a synthetic 5,000-note vault:
+
+| Measure | Result | Target |
+|---|---|---|
+| Questions with an expected note in the top 8 | 33 of 35 | 25 of 30 |
+| Unanswerable questions correctly returning nothing | 5 of 5 | 5 of 5 |
+| Full index of 5,000 notes | 6.6 s | under 30 s |
+| Median search over 5,000 notes | 12.6 ms | under 100 ms |
+
+The two misses are vocabulary mismatches that keyword search cannot close on its own: a question asking when the team "gets paged" against a note that says "we page", and a question about a "message queue" against a note titled "Queue comparison". Expanding the question with AI is built to address exactly this and has not yet been measured.
+
+The claim drop rate, the figure that decides whether the quote check is practical, needs a live provider and is still unmeasured.
 
 The full specification, including user stories and acceptance criteria, is in [SPEC.md](SPEC.md). Work in progress is tracked in the repository's issues.
 
@@ -70,6 +83,9 @@ npm run build
 | `npm run dev` | esbuild in watch mode, writes `main.js` |
 | `npm run build` | Type check with `tsc --noEmit`, then a production build |
 | `npm test` | Run the test suite with Vitest |
+| `npm run eval:vault` | Regenerate `test-vault/` from its definitions |
+| `npm run eval:retrieval` | Score retrieval against the evaluation questions |
+| `npm run eval:benchmark` | Measure index build and search time on 5,000 notes |
 
 To try it in Obsidian, copy `main.js`, `manifest.json` and `styles.css` into `<your-vault>/.obsidian/plugins/graphite-vault-chat/` and reload. Use a scratch vault rather than your real one while the plugin is in development.
 
@@ -79,4 +95,4 @@ Writing to the vault in any form is permanently out of scope. Embedding-based se
 
 ## License
 
-MIT. A `LICENSE` file is added with the first release.
+MIT. See [LICENSE](LICENSE).
