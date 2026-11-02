@@ -12,6 +12,7 @@ export type ProviderErrorKind =
   | "unreachable"
   | "timeout"
   | "refusal"
+  | "truncated"
   | "malformed"
   | "unknown";
 
@@ -61,10 +62,19 @@ export function errorForStatus(
   }
 
   if (status === 400) {
-    // 400 most often means the model name is wrong or unsupported for chat.
+    const detail = firstLine(body);
+    // Only blame the model name when the provider's own message is about the
+    // model. Groq returns 400 for a reply that failed JSON validation too, and
+    // telling the user to fix a correct model name sends them the wrong way.
+    if (/model/i.test(detail) && !/json/i.test(detail)) {
+      return new ProviderError(
+        "model",
+        `${providerLabel} rejected the model "${model}". Check the model name in settings. ${detail}`.trim(),
+      );
+    }
     return new ProviderError(
-      "model",
-      `${providerLabel} rejected the request for model "${model}". Check the model name in settings. ${firstLine(body)}`.trim(),
+      "unknown",
+      `${providerLabel} could not complete the request. Try asking again. ${detail}`.trim(),
     );
   }
 

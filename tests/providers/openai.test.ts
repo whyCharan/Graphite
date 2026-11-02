@@ -123,6 +123,15 @@ describe("OpenAiCompatibleProvider: failures name the fix", () => {
     expect(error.message).toContain("model_decommissioned");
   });
 
+  it("does not blame the model name when a 400 is about JSON validation", async () => {
+    const body = JSON.stringify({
+      error: { message: "Failed to validate JSON. Please adjust your prompt." },
+    });
+    const error = await providerWith(respond(400, body)).complete(request).catch((e) => e);
+    expect(error.kind).toBe("unknown");
+    expect(error.message).not.toContain("model name");
+  });
+
   it("maps a network failure on a local endpoint to a start-it message", async () => {
     const provider = new OpenAiCompatibleProvider({
       label: "LM Studio",
@@ -166,6 +175,21 @@ describe("OpenAiCompatibleProvider: failures name the fix", () => {
     expect(error.kind).toBe("refusal");
   });
 
+  it("reports an empty reply cut off at the token limit instead of passing it as an answer", async () => {
+    const body = JSON.stringify({
+      choices: [{ message: { content: "" }, finish_reason: "length" }],
+    });
+    const error = await providerWith(respond(200, body)).complete(request).catch((e) => e);
+    expect(error.kind).toBe("truncated");
+    expect(error.message).toContain("token allowance");
+  });
+
+  it("accepts an empty reply that finished normally", async () => {
+    const body = JSON.stringify({ choices: [{ message: { content: "" }, finish_reason: "stop" }] });
+    const result = await providerWith(respond(200, body)).complete(request);
+    expect(result.text).toBe("");
+  });
+
   it("never puts the API key into an error message", async () => {
     const error = await providerWith(respond(401, "")).complete(request).catch((e) => e);
     expect(error.message).not.toContain("test-key");
@@ -175,6 +199,13 @@ describe("OpenAiCompatibleProvider: failures name the fix", () => {
 describe("OpenAiCompatibleProvider.testConnection", () => {
   it("resolves when the provider replies", async () => {
     await expect(providerWith(respond(200, okBody)).testConnection()).resolves.toBeUndefined();
+  });
+
+  it("passes when a reasoning model spends the small test allowance thinking", async () => {
+    const body = JSON.stringify({
+      choices: [{ message: { content: "" }, finish_reason: "length" }],
+    });
+    await expect(providerWith(respond(200, body)).testConnection()).resolves.toBeUndefined();
   });
 
   it("asks for a base URL before sending anything", async () => {

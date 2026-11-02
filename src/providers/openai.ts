@@ -110,6 +110,16 @@ export class OpenAiCompatibleProvider implements ChatProvider {
       );
     }
 
+    // Reasoning models spend completion tokens thinking before they write. When
+    // the allowance runs out first, the reply is empty, which must not pass as
+    // an answer that simply contained nothing.
+    if (content.trim() === "" && choice?.finish_reason === "length") {
+      throw new ProviderError(
+        "truncated",
+        `${this.label} used its whole token allowance before writing an answer. Try a non-reasoning model, or lower "Notes per answer" in settings.`,
+      );
+    }
+
     return { text: content, usage: readUsage(parsed) };
   }
 
@@ -121,11 +131,18 @@ export class OpenAiCompatibleProvider implements ChatProvider {
     if (!this.options.model) {
       throw new ProviderError("model", "Set a model name for this provider in settings.");
     }
-    await this.complete({
-      system: "Reply with the single word: ok",
-      messages: [{ role: "user", content: "ok" }],
-      maxTokens: 5,
-    });
+    try {
+      await this.complete({
+        system: "Reply with the single word: ok",
+        messages: [{ role: "user", content: "ok" }],
+        maxTokens: 16,
+      });
+    } catch (cause) {
+      // A reasoning model may spend a tiny allowance thinking and write nothing.
+      // The key, model and endpoint all worked, which is what the test checks.
+      if (cause instanceof ProviderError && cause.kind === "truncated") return;
+      throw cause;
+    }
   }
 }
 
