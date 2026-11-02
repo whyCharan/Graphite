@@ -1,4 +1,5 @@
 import { requestUrl } from "obsidian";
+import { OllamaProvider } from "./ollama";
 import { OpenAiCompatibleProvider } from "./openai";
 import { findPreset } from "./presets";
 import type { ChatProvider, HttpFetch } from "./types";
@@ -41,9 +42,10 @@ export function createProvider(
   switch (preset.kind) {
     case "openai":
       return new OpenAiCompatibleProvider({ label: preset.label, baseUrl, model, apiKey, http });
-    case "anthropic":
     case "ollama":
-      // Built in Tasks 14 and 15. Until then these presets fall back to search only.
+      return new OllamaProvider({ baseUrl, model, http });
+    case "anthropic":
+      // Built in Task 14, which needs the official SDK as a dependency.
       return null;
   }
 };
