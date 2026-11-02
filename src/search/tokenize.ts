@@ -20,8 +20,15 @@ const STOP_WORDS = new Set([
   "why", "will", "with", "would", "you", "your",
 ]);
 
-/** Words whose trailing "s" belongs to the stem, not a plural. */
-const PROTECTED_STEMS = new Set(["css", "js", "ts", "aws", "gas", "class", "less", "jss"]);
+/**
+ * Words whose trailing "s" belongs to the stem, not a plural. Matching would
+ * still work if these were folded, since queries fold the same way, but the
+ * folded form is what the panel shows as "Matched: postgre".
+ */
+const PROTECTED_STEMS = new Set([
+  "css", "js", "ts", "aws", "gas", "class", "less", "jss",
+  "postgres", "kubernetes", "series", "species", "news", "atlas", "alias", "canvas",
+]);
 
 /**
  * Strips diacritics so "café" and "cafe" are one term.
@@ -43,7 +50,8 @@ function foldPlural(term: string): string {
   if (term.endsWith("ies")) return `${term.slice(0, -3)}y`;
   if (term.endsWith("sses")) return term.slice(0, -2);
   if (term.endsWith("es") && /(ch|sh|x|z)es$/.test(term)) return term.slice(0, -2);
-  if (term.endsWith("s") && !term.endsWith("ss") && !term.endsWith("us")) return term.slice(0, -1);
+  // "-is" is a singular ending (analysis, basis, redis), not a plural.
+  if (term.endsWith("s") && !/(ss|us|is)$/.test(term)) return term.slice(0, -1);
   return term;
 }
 
