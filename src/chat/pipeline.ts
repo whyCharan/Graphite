@@ -10,8 +10,12 @@ import { verifyAnswer, type VerifiedAnswer } from "./quotes";
 /** Conversation turns kept for follow-up questions (US-4). */
 export const MAX_HISTORY_MESSAGES = 6;
 
-/** Ceiling on an answer, generous enough for several cited claims. */
-const ANSWER_MAX_TOKENS = 800;
+/**
+ * Ceiling on an answer. Reasoning models count their thinking against this
+ * before writing a word: a one-sentence answer cost gpt-oss 182 tokens on Groq,
+ * so 800 left too little room once eight excerpts were in the prompt.
+ */
+const ANSWER_MAX_TOKENS = 2048;
 
 /** What was sent to the provider, shown under the answer (US-10). */
 export interface SentRecord {
@@ -50,7 +54,8 @@ export interface AskOptions {
   /** Earlier turns, oldest first. Trimmed to the last {@link MAX_HISTORY_MESSAGES}. */
   history: readonly ChatMessage[];
   provider: ChatProvider | null;
-  searchTerms: (terms: readonly string[], limit: number) => SearchResult;
+  /** `ownTerms` set the relevance floor from the user's words, not the expansion. */
+  searchTerms: (terms: readonly string[], limit: number, ownTerms: readonly string[]) => SearchResult;
   notesPerAnswer: number;
   expandQuestion: boolean;
   /** Resolves a wikilink target, so unresolved links are unwrapped. */
@@ -76,6 +81,7 @@ export async function ask(options: AskOptions): Promise<AskOutcome> {
 
   let terms = tokenizeQuery(question);
   if (terms.length === 0) return { kind: "no-terms" };
+  const ownTerms = terms;
 
   if (options.expandQuestion && provider) {
     onStep("Expanding your question");
@@ -84,7 +90,7 @@ export async function ask(options: AskOptions): Promise<AskOutcome> {
   }
 
   onStep("Searching your notes");
-  const result = options.searchTerms(terms, options.notesPerAnswer);
+  const result = options.searchTerms(terms, options.notesPerAnswer, ownTerms);
 
   if (result.notes.length === 0) {
     // No matches: the answer call is skipped entirely (spec safeguard).
