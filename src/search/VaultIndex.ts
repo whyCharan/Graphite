@@ -35,8 +35,8 @@ const MAX_SNIPPETS_PER_NOTE = 3;
  * tournament" matched a note about message queues on the word "won". Saying
  * nothing matched is the honest answer, and criterion 3 requires it.
  *
- * Capped at two so an expanded question, whose extra terms are alternatives
- * rather than requirements, is not made harder to satisfy.
+ * Computed from the user's own terms, never the expanded list, and capped at
+ * two, so expansion can widen a search but never make it harder to satisfy.
  */
 function requiredTermMatches(termCount: number): number {
   return Math.max(1, Math.min(2, Math.ceil(termCount / 2)));
@@ -142,20 +142,27 @@ export class VaultIndex {
     const terms = tokenizeQuery(query);
     if (terms.length === 0) return { terms, notes: [] };
 
-    return { terms, notes: this.rank(terms, limit) };
+    return { terms, notes: this.rank(terms, limit, terms) };
   }
 
-  /** Searches with terms already expanded, so expansion stays out of the index. */
-  searchTerms(terms: readonly string[], limit = 8): SearchResult {
+  /**
+   * Searches with terms already expanded, so expansion stays out of the index.
+   *
+   * `ownTerms` are the terms from the user's own question. The relevance floor
+   * is set from them alone: expanded terms are alternatives, and counting them
+   * raised the bar for a one-word question from one match to two, so "what is a
+   * leg" stopped finding the glossary.
+   */
+  searchTerms(terms: readonly string[], limit = 8, ownTerms: readonly string[] = terms): SearchResult {
     if (terms.length === 0) return { terms: [...terms], notes: [] };
-    return { terms: [...terms], notes: this.rank(terms, limit) };
+    return { terms: [...terms], notes: this.rank(terms, limit, ownTerms) };
   }
 
-  private rank(terms: readonly string[], limit: number): NoteHit[] {
+  private rank(terms: readonly string[], limit: number, ownTerms: readonly string[]): NoteHit[] {
     // Over-fetch sections so a note whose hits are spread thin still groups well.
     const sectionHits = this.bm25.search(terms, Math.max(limit * 8, 50));
     // Group more notes than asked for, so the boost has neighbours to work with.
-    const grouped = groupByNote(sectionHits, terms, limit * 2);
+    const grouped = groupByNote(sectionHits, terms, limit * 2, ownTerms);
     if (!this.linkGraph) return grouped.slice(0, limit);
 
     return applyLinkBoost(grouped, this.linkGraph, {
@@ -182,7 +189,10 @@ function groupByNote(
   sectionHits: readonly SectionHit[],
   terms: readonly string[],
   limit: number,
+  ownTerms: readonly string[],
 ): NoteHit[] {
+  const required = requiredTermMatches(ownTerms.length);
+  const own = new Set(ownTerms);
   const byNote = new Map<string, SectionHit[]>();
   for (const hit of sectionHits) {
     const existing = byNote.get(hit.section.notePath);
@@ -190,7 +200,6 @@ function groupByNote(
     else byNote.set(hit.section.notePath, [hit]);
   }
 
-  const required = requiredTermMatches(terms.length);
   const notes: NoteHit[] = [];
 
   for (const [notePath, hits] of byNote) {
@@ -201,6 +210,14 @@ function groupByNote(
     const matched = new Set<string>();
     for (const hit of hits) for (const term of hit.matchedTerms) matched.add(term);
     if (matched.size < required) continue;
+
+    // A note found only through one word the AI added, with none of the user's
+    // own, is not trusted: expanding "salary bands" added "level", which pulled
+    // in two unrelated notes where the honest reply was that nothing matched.
+    // Two independent expanded words agreeing is still accepted, which is how
+    // "paged" finds a note that says "we page" and names "alerts".
+    const ownMatched = [...matched].filter((term) => own.has(term)).length;
+    if (ownMatched === 0 && matched.size < 2) continue;
 
     notes.push({
       notePath,

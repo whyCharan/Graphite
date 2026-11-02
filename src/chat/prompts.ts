@@ -33,6 +33,8 @@ export const ANSWER_SYSTEM_PROMPT = [
 
 export const EXPANSION_SYSTEM_PROMPT = [
   "You turn a question into search terms for a keyword search over someone's notes.",
+  "The notes are their own working notes, so read each word in the sense it has",
+  "in a work or project context, not its everyday sense.",
   "",
   'Reply with JSON only, in the form {"terms": ["term1", "term2"]}.',
   "Give 3 to 8 single words: the important words from the question plus close",

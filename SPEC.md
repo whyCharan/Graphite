@@ -147,7 +147,7 @@ Exact versions are pinned in `package-lock.json` when dependencies are installed
 |---|---|
 | Provider | Groq (an OpenAI-compatible preset), chosen because its free tier lets people try AI answers without paying |
 | Provider presets | Groq (`https://api.groq.com/openai/v1`), OpenAI, OpenRouter, LM Studio, Custom OpenAI-compatible, Anthropic, Ollama |
-| Groq model | `llama-3.3-70b-versatile`, to be checked against Groq's current model list when the provider task is built |
+| Groq model | `qwen/qwen3.8-27b`. The original default, `llama-3.3-70b-versatile`, was retired by Groq; the replacement was chosen by measurement on 2 November 2026 (see Decisions, Q8) |
 | Other OpenAI-compatible model | empty (required) |
 | Anthropic model | `claude-haiku-5-5` (assumption: cheapest default, to match the cost-first default) |
 | Ollama base URL / model | `http://localhost:11434` / empty (required) |
@@ -282,6 +282,7 @@ Targets 2 and 4 are proposed numbers. Adjust them if you want them stricter or l
 | Q4 | GitHub repository name and visibility | `whyCharan/Graphite`, public. Decided 2 November 2026, ahead of T18. |
 | Q5 | Anthropic's Citations API for the Anthropic provider? | No. One quote check for every provider. |
 | Q6 | Panel design direction | Native to Obsidian: theme variables, ENERGY 1 / RHYTHM 1 / MOTION 1, the verified-quote block as the one accent. |
+| Q8 | Groq default model, after `llama-3.3-70b-versatile` was retired | `qwen/qwen3.8-27b`. Measured against `openai/gpt-oss-120b` on the 35 evaluation questions: 35 of 35 answered against 34, 4.0% of claims removed against 8.5%, and about an eighth of the output tokens. Expansion stays on by default, since it improved retrieval on both models. |
 
 ## Open Questions
 

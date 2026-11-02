@@ -23,6 +23,13 @@ describe("tokenize", () => {
   it("keeps stems whose trailing s is not a plural", () => {
     expect(tokenize("css")).toEqual(["css"]);
     expect(tokenize("class")).toEqual(["class"]);
+    // Shown to the user as a match reason, so "postgre" would read as a bug.
+    expect(tokenize("Postgres")).toEqual(["postgres"]);
+    expect(tokenize("kubernetes")).toEqual(["kubernetes"]);
+  });
+
+  it("treats an -is ending as singular", () => {
+    expect(tokenize("analysis redis basis")).toEqual(["analysis", "redis", "basis"]);
   });
 
   it("strips diacritics so accented and unaccented spellings match", () => {

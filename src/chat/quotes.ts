@@ -76,6 +76,9 @@ function splitClaims(answer: string): Array<{ text: string; citations: ParsedCit
         return "";
       })
       .replace(/\s+/g, " ")
+      // Some models put the full stop after the citation, which would leave
+      // "throughput ." once the citation is removed.
+      .replace(/\s+([.,;:!?])/g, "$1")
       .trim();
     return { text, citations };
   });

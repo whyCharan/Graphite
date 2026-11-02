@@ -102,13 +102,17 @@ describe("expandQuestion", () => {
     expect(complete).not.toHaveBeenCalled();
   });
 
-  it("asks the provider for JSON", async () => {
+  it("asks for JSON in the prompt without strict JSON mode, which providers reject", async () => {
     const complete = vi.fn<ChatProvider["complete"]>(async () => ({
       text: '{"terms": ["alpha", "bravo", "charlie"]}',
       usage: { sent: null, received: null },
     }));
     await expandQuestion("question", { ...provider("{}"), complete });
 
-    expect(complete.mock.calls[0][0].json).toBe(true);
+    const sent = complete.mock.calls[0][0];
+    expect(sent.json).toBeUndefined();
+    expect(sent.system).toContain("JSON");
+    // Room for a reasoning model to think before it writes the terms.
+    expect(sent.maxTokens).toBeGreaterThanOrEqual(512);
   });
 });

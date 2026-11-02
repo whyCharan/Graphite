@@ -80,6 +80,34 @@ describe("VaultIndex relevance floor", () => {
     expect(index.search("how many requests per minute are allowed").notes).toHaveLength(1);
   });
 
+  it("sets the floor from the user's own words, so expansion cannot raise it", () => {
+    const index = new VaultIndex();
+    index.indexNote(note("Glossary.md", "A leg is one movement between two facilities."));
+
+    // The user typed one word; expansion added five unhelpful synonyms. One
+    // match on the user's word is still enough.
+    const expanded = ["leg", "limb", "extremity", "lower", "skeletal", "muscle"];
+    expect(index.searchTerms(expanded, 8, ["leg"]).notes).toHaveLength(1);
+  });
+
+  it("ignores a note found only through one word the AI added", () => {
+    const index = new VaultIndex();
+    index.indexNote(note("Carbon reporting.md", "Reporting at the route level is possible today."));
+
+    // "level" came from expansion, not from the user's question.
+    const expanded = ["salary", "band", "level", "pay", "grade"];
+    expect(index.searchTerms(expanded, 8, ["salary", "band"]).notes).toEqual([]);
+  });
+
+  it("accepts a note found through two words the AI added, with none of the user's own", () => {
+    const index = new VaultIndex();
+    index.indexNote(note("Alert thresholds.md", "We page when the error rate passes one percent."));
+
+    // "paged" never appears, but "page" and "alert" independently agree.
+    const expanded = ["paged", "page", "alert", "pager"];
+    expect(index.searchTerms(expanded, 8, ["paged"]).notes).toHaveLength(1);
+  });
+
   it("never requires more than two matched terms, so expansion cannot raise the bar", () => {
     const index = new VaultIndex();
     index.indexNote(note("Caching.md", "Tracking responses are cached at the edge."));

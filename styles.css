@@ -4,6 +4,10 @@
  * Every colour, font and radius comes from Obsidian's own theme variables, so
  * the panel follows whatever theme the user runs rather than introducing a
  * second visual language beside their notes.
+ *
+ * Button rules are written as ".graphite-panel button.<class>": Obsidian styles
+ * every button through "button:not(.clickable-icon)", which outranks a single
+ * class and drew result items and quote links as raised buttons.
  */
 
 .graphite-panel {
@@ -29,7 +33,7 @@
   color: var(--text-normal);
 }
 
-.graphite-icon-button {
+.graphite-panel button.graphite-icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -40,7 +44,7 @@
   cursor: pointer;
 }
 
-.graphite-icon-button:hover {
+.graphite-panel button.graphite-icon-button:hover {
   color: var(--text-normal);
   background: var(--background-modifier-hover);
 }
@@ -80,7 +84,7 @@
   gap: var(--size-4-1);
 }
 
-.graphite-result {
+.graphite-panel button.graphite-result {
   display: block;
   width: 100%;
   text-align: left;
@@ -96,11 +100,11 @@
   height: auto;
 }
 
-.graphite-result:hover {
+.graphite-panel button.graphite-result:hover {
   background: var(--background-modifier-hover);
 }
 
-.graphite-result:focus-visible {
+.graphite-panel button.graphite-result:focus-visible {
   /* Obsidian's own focus ring, never removed. */
   border-color: var(--background-modifier-border-focus);
   box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
@@ -156,7 +160,7 @@
   overflow-wrap: anywhere;
 }
 
-.graphite-citation {
+.graphite-panel button.graphite-citation {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -174,7 +178,7 @@
   vertical-align: baseline;
 }
 
-.graphite-citation:hover {
+.graphite-panel button.graphite-citation:hover {
   color: var(--text-on-accent);
   background: var(--interactive-accent);
 }
@@ -198,7 +202,7 @@
   text-wrap: pretty;
 }
 
-.graphite-quote-source {
+.graphite-panel button.graphite-quote-source {
   margin-top: var(--size-2-2);
   padding: 0;
   background: transparent;
@@ -207,6 +211,10 @@
   font-size: var(--font-ui-smaller);
   cursor: pointer;
   overflow-wrap: anywhere;
+}
+
+.graphite-panel button.graphite-quote-source:hover {
+  text-decoration: underline;
 }
 
 .graphite-removed,
@@ -237,7 +245,7 @@
   gap: var(--size-4-1);
 }
 
-.graphite-source {
+.graphite-panel button.graphite-source {
   display: block;
   width: 100%;
   height: auto;
@@ -251,7 +259,7 @@
   cursor: pointer;
 }
 
-.graphite-source:hover {
+.graphite-panel button.graphite-source:hover {
   background: var(--background-modifier-hover);
 }
 

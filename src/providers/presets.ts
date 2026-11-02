@@ -35,9 +35,12 @@ export const PRESETS: readonly ProviderPreset[] = [
     label: "Groq",
     kind: "openai",
     baseUrl: "https://api.groq.com/openai/v1",
-    // Spec Q2's default. Groq retires model names, so the field stays editable
-    // and an unknown-model error names the fix (Task 13).
-    defaultModel: "llama-3.3-70b-versatile",
+    // Groq retired llama-3.3-70b-versatile, the spec's original default. Chosen
+    // by measurement on 2 November 2026 against gpt-oss-120b: 35 of 35 test
+    // questions answered against 34, 4.0% of claims removed against 8.5%, and an
+    // eighth of the output tokens, which matters on the free tier. Groq retires
+    // models, so the field stays editable and an unknown-model error names the fix.
+    defaultModel: "qwen/qwen3.8-27b",
     needsKey: true,
     editableBaseUrl: false,
   },

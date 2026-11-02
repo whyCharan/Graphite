@@ -21,11 +21,14 @@ export async function expandQuestion(
   if (!provider || own.length === 0) return { terms: own, expanded: false };
 
   try {
+    // No strict JSON mode: Groq rejects a reasoning model's reply with a 400
+    // when it is not valid JSON, which failed three expansions in four on
+    // gpt-oss. The prompt asks for JSON and parseTerms reads it leniently.
+    // The allowance leaves room for a reasoning model to think first.
     const result = await provider.complete({
       system: EXPANSION_SYSTEM_PROMPT,
       messages: [{ role: "user", content: question }],
-      maxTokens: 120,
-      json: true,
+      maxTokens: 512,
     });
 
     const parsed = parseTerms(result.text);

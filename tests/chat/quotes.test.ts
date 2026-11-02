@@ -65,6 +65,11 @@ describe("verifyAnswer: citations that should pass", () => {
     expect(result.claims[0].citations.map((c) => c.verified)).toEqual([true, false]);
   });
 
+  it("leaves no stray space when the model puts the full stop after the citation", () => {
+    const result = verifyAnswer('We picked Groq [1: "we chose Groq for latency"]. Next.', hits);
+    expect(result.claims[0].text).toBe("We picked Groq.");
+  });
+
   it("strips the citation markup from the claim text it shows", () => {
     const result = verifyAnswer('We picked Groq. [1: "we chose Groq for latency"]', hits);
     expect(result.claims[0].text).toBe("We picked Groq.");
