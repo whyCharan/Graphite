@@ -1,6 +1,7 @@
 import type { SentRecord } from "../chat/pipeline";
 import { removedClaimsMessage, type Claim, type VerifiedAnswer } from "../chat/quotes";
 import type { NoteHit } from "../search/types";
+import { plainText } from "./results";
 
 export interface AnswerCallbacks {
   openNote: (notePath: string, newTab: boolean) => void;
@@ -105,7 +106,7 @@ function renderSources(
     item.type = "button";
     item.createDiv({ cls: "graphite-source-title", text: note.noteTitle });
     if (note.folder) item.createDiv({ cls: "graphite-source-folder", text: note.folder });
-    const excerpt = note.snippets[0]?.section.body.replace(/\s+/g, " ").trim() ?? "";
+    const excerpt = plainText(note.snippets[0]?.section.body ?? "");
     if (excerpt) {
       item.createDiv({ cls: "graphite-source-excerpt", text: truncate(excerpt, 180) });
     }

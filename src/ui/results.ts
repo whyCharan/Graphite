@@ -80,7 +80,7 @@ function buildExcerpt(note: NoteHit): Excerpt {
   const best = note.snippets[0];
   if (!best) return { text: "", terms: [] };
 
-  const body = best.section.body.replace(/\s+/g, " ").trim();
+  const body = plainText(best.section.body);
   const terms = best.matchedTerms;
   if (body.length <= EXCERPT_LENGTH) return { text: body, terms };
 
@@ -122,6 +122,22 @@ function renderExcerpt(target: HTMLElement, text: string, terms: readonly string
     lastIndex = at + match[0].length;
   }
   if (lastIndex < text.length) target.appendText(text.slice(lastIndex));
+}
+
+/**
+ * Strips the Markdown markers an excerpt would otherwise show literally, such
+ * as "**parcel**", keeping every word. Display only: the quote check works on
+ * the note text itself.
+ */
+export function plainText(markdown: string): string {
+  return markdown
+    .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2")
+    .replace(/\[\[([^\]]+)\]\]/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/(\*\*|__|~~|`)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function escapeRegExp(value: string): string {

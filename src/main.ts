@@ -68,6 +68,8 @@ export default class GraphitePlugin extends Plugin {
     if (!leaf) return;
     if (!existing) await leaf.setViewState({ type: VIEW_TYPE_GRAPHITE, active: true });
     await workspace.revealLeaf(leaf);
+    // The panel opens ready to type (spec: keyboard).
+    if (leaf.view instanceof ChatView) leaf.view.focusInput();
   }
 
   private refreshViews(): void {

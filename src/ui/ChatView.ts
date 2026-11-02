@@ -64,6 +64,14 @@ export class ChatView extends ItemView {
     this.contentEl.empty();
   }
 
+  /**
+   * Puts the cursor in the question box. Called after the leaf is revealed,
+   * because revealing it moves focus and undoes the focus set in onOpen.
+   */
+  focusInput(): void {
+    this.input?.focus();
+  }
+
   /** Called when the index changes, so indexing progress stays current. */
   onIndexChanged(): void {
     if (!this.busy) this.render();
@@ -225,7 +233,7 @@ export class ChatView extends ItemView {
         question,
         history: this.history,
         provider: this.plugin.createProvider(),
-        searchTerms: (terms, limit) => this.plugin.index.searchTerms(terms, limit),
+        searchTerms: (terms, limit, ownTerms) => this.plugin.index.searchTerms(terms, limit, ownTerms),
         notesPerAnswer: this.plugin.settings.notesPerAnswer,
         expandQuestion: this.plugin.settings.expandQuestion,
         resolvesLink: (target) => this.plugin.resolvesLink(target, ""),
