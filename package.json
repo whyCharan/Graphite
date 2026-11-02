@@ -10,7 +10,8 @@
     "test": "vitest run",
     "eval:vault": "node eval/run.mjs eval/generate-test-vault.ts",
     "eval:retrieval": "node eval/run.mjs eval/run-retrieval.ts",
-    "eval:benchmark": "node eval/run.mjs eval/benchmark.ts"
+    "eval:benchmark": "node eval/run.mjs eval/benchmark.ts",
+    "eval:answers": "node eval/run.mjs eval/run-answers.ts"
   },
   "author": "Charan Sandaka",
   "license": "MIT",
