@@ -1,7 +1,11 @@
 import { ItemView, setIcon, type WorkspaceLeaf } from "obsidian";
+import { ask, type AskOutcome } from "../chat/pipeline";
+import { UNVERIFIED_MESSAGE } from "../chat/prompts";
+import { removedClaimsMessage } from "../chat/quotes";
 import type GraphitePlugin from "../main";
 import { findPreset } from "../providers/presets";
-import type { SearchResult } from "../search/VaultIndex";
+import type { ChatMessage } from "../providers/types";
+import { renderAnswer } from "./answer";
 import { renderResults } from "./results";
 
 export const VIEW_TYPE_GRAPHITE = "graphite-chat";
@@ -16,9 +20,11 @@ export const VIEW_TYPE_GRAPHITE = "graphite-chat";
 export class ChatView extends ItemView {
   private input: HTMLTextAreaElement | null = null;
   private statusEl: HTMLElement | null = null;
-  private resultsEl: HTMLElement | null = null;
-  private lastResult: SearchResult | null = null;
-  private searching = false;
+  private bodyEl: HTMLElement | null = null;
+  private outcome: AskOutcome | null = null;
+  private question = "";
+  private history: ChatMessage[] = [];
+  private busy = false;
 
   constructor(
     leaf: WorkspaceLeaf,
@@ -46,10 +52,10 @@ export class ChatView extends ItemView {
 
     this.renderHeader(root);
     this.statusEl = root.createDiv({ cls: "graphite-status" });
-    this.resultsEl = root.createDiv({ cls: "graphite-body" });
+    this.bodyEl = root.createDiv({ cls: "graphite-body" });
     this.renderComposer(root);
 
-    this.renderState();
+    this.render();
     // The panel opens ready to type (spec: keyboard).
     this.input?.focus();
   }
@@ -58,9 +64,9 @@ export class ChatView extends ItemView {
     this.contentEl.empty();
   }
 
-  /** Called when the index changes, so progress and results stay current. */
+  /** Called when the index changes, so indexing progress stays current. */
   onIndexChanged(): void {
-    if (!this.searching) this.renderState();
+    if (!this.busy) this.render();
   }
 
   private renderHeader(root: HTMLElement): void {
@@ -91,15 +97,17 @@ export class ChatView extends ItemView {
 
     const send = composer.createEl("button", { cls: "graphite-send" });
     send.type = "button";
-    send.setAttribute("aria-label", "Search notes");
+    send.setAttribute("aria-label", "Ask");
     setIcon(send, "arrow-right");
     send.addEventListener("click", () => void this.submit());
   }
 
   private reset(): void {
-    this.lastResult = null;
+    this.outcome = null;
+    this.question = "";
+    this.history = [];
     if (this.input) this.input.value = "";
-    this.renderState();
+    this.render();
     this.input?.focus();
   }
 
@@ -116,78 +124,126 @@ export class ChatView extends ItemView {
     return `AI answers: ${preset.label}, ${this.plugin.settings.model}`;
   }
 
-  private renderState(): void {
-    const body = this.resultsEl;
+  private openNote = (notePath: string, newTab: boolean): void => {
+    void this.app.workspace.openLinkText(notePath, "", newTab);
+  };
+
+  private render(): void {
+    const body = this.bodyEl;
     if (!body) return;
     body.empty();
 
     const progress = this.plugin.index.progress;
-    if (progress.building) {
+    if (progress.building && !this.busy) {
       this.setStatus(`Indexing your vault: ${progress.done} of ${progress.total} notes`);
-    } else {
+    } else if (!this.busy) {
       this.setStatus("");
     }
 
-    if (!this.lastResult) {
-      const empty = body.createDiv({ cls: "graphite-empty" });
-      empty.createDiv({
-        cls: "graphite-empty-lead",
-        text: "Ask a question and Graphite finds the notes that answer it, with a quote from each one.",
-      });
-      empty.createDiv({ cls: "graphite-note", text: this.providerLine() });
-      if (progress.building) {
-        empty.createDiv({
+    if (!this.outcome) {
+      this.renderEmpty(body, progress.building);
+      return;
+    }
+
+    switch (this.outcome.kind) {
+      case "no-terms":
+        this.renderNotice(body, "That question had no words to search for.", "Try naming a topic, a project or a person.");
+        return;
+
+      case "no-matches":
+        this.renderNotice(
+          body,
+          "No notes matched that question.",
+          this.outcome.terms.length > 0
+            ? `Searched for: ${this.outcome.terms.join(", ")}`
+            : "No searchable words in that question.",
+        );
+        return;
+
+      case "search-only": {
+        if (this.outcome.reason) {
+          body.createDiv({ cls: "graphite-notice", text: this.outcome.reason });
+        }
+        body.createDiv({
           cls: "graphite-note",
-          text: "You can ask while indexing runs. Search uses the notes indexed so far.",
+          text: this.outcome.reason
+            ? "Your search results are below."
+            : `${this.outcome.notes.length} ${this.outcome.notes.length === 1 ? "note" : "notes"} matched. ${this.providerLine()}`,
         });
+        renderResults(body, this.outcome.notes, { openNote: this.openNote });
+        return;
       }
-      return;
+
+      case "unverified": {
+        body.createDiv({ cls: "graphite-notice", text: UNVERIFIED_MESSAGE });
+        const removed = removedClaimsMessage(this.outcome.removedCount);
+        if (removed) body.createDiv({ cls: "graphite-removed", text: removed });
+        body.createDiv({ cls: "graphite-note", text: "These notes matched your question:" });
+        renderResults(body, this.outcome.notes, { openNote: this.openNote });
+        return;
+      }
+
+      case "answered":
+        renderAnswer(body, this.outcome.verified, this.outcome.notes, this.outcome.sent, {
+          openNote: this.openNote,
+        });
+        return;
     }
+  }
 
-    const { terms, notes } = this.lastResult;
-
-    if (notes.length === 0) {
-      const none = body.createDiv({ cls: "graphite-empty" });
-      none.createDiv({
-        cls: "graphite-empty-lead",
-        text: "No notes matched that question.",
-      });
-      none.createDiv({
+  private renderEmpty(body: HTMLElement, building: boolean): void {
+    const empty = body.createDiv({ cls: "graphite-empty" });
+    empty.createDiv({
+      cls: "graphite-empty-lead",
+      text: "Ask a question and Graphite answers from your notes, with a quote from each note it cites.",
+    });
+    empty.createDiv({ cls: "graphite-note", text: this.providerLine() });
+    if (building) {
+      empty.createDiv({
         cls: "graphite-note",
-        text: terms.length > 0 ? `Searched for: ${terms.join(", ")}` : "No searchable words in that question.",
+        text: "You can ask while indexing runs. Search uses the notes indexed so far.",
       });
-      return;
     }
+  }
 
-    body.createDiv({
-      cls: "graphite-note",
-      text: `${notes.length} ${notes.length === 1 ? "note" : "notes"} matched. ${this.providerLine()}`,
-    });
-
-    renderResults(body, notes, {
-      openNote: (notePath, newTab) => {
-        void this.app.workspace.openLinkText(notePath, "", newTab);
-      },
-    });
+  private renderNotice(body: HTMLElement, lead: string, detail: string): void {
+    const notice = body.createDiv({ cls: "graphite-empty" });
+    notice.createDiv({ cls: "graphite-empty-lead", text: lead });
+    notice.createDiv({ cls: "graphite-note", text: detail });
   }
 
   private async submit(): Promise<void> {
     const question = this.input?.value.trim() ?? "";
-    if (!question || this.searching) return;
+    if (!question || this.busy) return;
 
-    this.searching = true;
-    this.setStatus("Searching your notes");
+    this.busy = true;
+    this.question = question;
+    if (this.input) this.input.value = "";
 
     try {
-      // Search is synchronous and local; the await keeps the UI responsive if
-      // that changes and makes the working state observable.
-      this.lastResult = await Promise.resolve(
-        this.plugin.index.search(question, this.plugin.settings.notesPerAnswer),
-      );
+      this.outcome = await ask({
+        question,
+        history: this.history,
+        provider: this.plugin.createProvider(),
+        searchTerms: (terms, limit) => this.plugin.index.searchTerms(terms, limit),
+        notesPerAnswer: this.plugin.settings.notesPerAnswer,
+        expandQuestion: this.plugin.settings.expandQuestion,
+        resolvesLink: (target) => this.plugin.resolvesLink(target, ""),
+        onStep: (step) => this.setStatus(step),
+      });
+      this.rememberTurn();
     } finally {
-      this.searching = false;
+      this.busy = false;
+      this.setStatus("");
     }
 
-    this.renderState();
+    this.render();
+  }
+
+  /** Keeps the turn so a follow-up can narrow the previous answer (US-4). */
+  private rememberTurn(): void {
+    if (this.outcome?.kind !== "answered") return;
+    this.history.push({ role: "user", content: this.question });
+    this.history.push({ role: "assistant", content: this.outcome.verified.answer });
   }
 }
