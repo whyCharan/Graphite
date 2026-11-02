@@ -5,8 +5,7 @@
 | Version | 0.2 draft (adds verified quotes, search without AI, match explanations, transparency) |
 | Author | Charan Sandaka |
 | Date | 2 November 2026 |
-| Status | Approved 2 November 2026. Plan in `tasks/plan.md` |
-| Market context | `09_Antigravity/Startup Brain/Graphite.md` |
+| Status | Approved 2 November 2026 |
 
 ---
 
@@ -236,7 +235,7 @@ Tests live in `tests/`, named after the module (`tests/search/bm25.test.ts`). Ea
 - Run `npm test` and `npm run build` before every commit.
 - Keep `search/` and `chat/` free of Obsidian imports.
 - Treat note content as untrusted data in every prompt.
-- Credit Charan Sandaka as the author everywhere: code, docs, commits.
+- Credit Charan Sandaka as the author in `package.json`, `manifest.json` and commits. The README carries no author section.
 - Write plain Markdown docs with no emojis.
 
 **Ask first**
@@ -295,5 +294,5 @@ Targets 2 and 4 are proposed numbers. Adjust them if you want them stricter or l
 ## Next Steps (gated)
 
 1. Spec approved on 2 November 2026.
-2. Plan and task list: `tasks/plan.md` and `tasks/todo.md`, awaiting your review.
+2. Plan and task list are tracked outside this repository.
 3. Implement task by task, each with tests, after your go-ahead.

@@ -8,7 +8,7 @@ Early development. Version 0.1 is being built and is **not usable yet**.
 
 What exists today is the plugin skeleton: it loads in Obsidian, registers a ribbon icon and a command, and opens an empty side panel. Search, AI answers and provider settings are not built yet. There is no release to install.
 
-Progress is tracked in [tasks/todo.md](tasks/todo.md). The full specification, including user stories and acceptance criteria, is in [SPEC.md](SPEC.md).
+The full specification, including user stories and acceptance criteria, is in [SPEC.md](SPEC.md). Work in progress is tracked in the repository's issues.
 
 ## Why another vault chat plugin
 
@@ -80,7 +80,3 @@ Writing to the vault in any form is permanently out of scope. Embedding-based se
 ## License
 
 MIT. A `LICENSE` file is added with the first release.
-
-## Author
-
-Charan Sandaka
