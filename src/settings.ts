@@ -18,7 +18,7 @@ export interface GraphiteSettings {
 export const DEFAULT_SETTINGS: GraphiteSettings = {
   preset: "groq",
   baseUrl: "",
-  model: "llama-3.3-70b-versatile",
+  model: "qwen/qwen3.8-27b",
   notesPerAnswer: 8,
   expandQuestion: true,
   excludedFolders: "",
