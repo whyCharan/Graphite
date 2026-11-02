@@ -68,7 +68,13 @@ export class Bm25Index {
     title: 0, aliases: 0, tags: 0, heading: 0, body: 0, folder: 0,
   };
 
-  constructor(private readonly weights: Readonly<Record<Field, number>> = DEFAULT_WEIGHTS) {}
+  private readonly weights: Readonly<Record<Field, number>>;
+
+  // Assigned explicitly rather than as a constructor parameter property, so the
+  // pure search core runs under plain type stripping (the evaluation scripts).
+  constructor(weights: Readonly<Record<Field, number>> = DEFAULT_WEIGHTS) {
+    this.weights = weights;
+  }
 
   get size(): number {
     return this.docs.size;
