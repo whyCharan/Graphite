@@ -9,11 +9,15 @@
  * genuinely about stays searchable.
  */
 const STOP_WORDS = new Set([
-  "a", "an", "and", "are", "as", "at", "be", "but", "by", "did", "do", "does",
-  "for", "from", "had", "has", "have", "how", "i", "if", "in", "into", "is",
-  "it", "its", "of", "on", "or", "so", "than", "that", "the", "their", "them",
-  "then", "there", "these", "they", "this", "to", "was", "were", "what", "when",
-  "where", "which", "who", "why", "will", "with", "you", "your",
+  "a", "about", "all", "also", "an", "and", "any", "are", "as", "at", "be",
+  "been", "being", "both", "but", "by", "can", "could", "did", "do", "does",
+  "each", "for", "from", "get", "got", "had", "has", "have", "he", "her",
+  "him", "his", "how", "i", "if", "in", "into", "is", "it", "its", "just",
+  "me", "more", "most", "my", "of", "on", "only", "or", "other", "our", "own",
+  "same", "she", "should", "so", "some", "such", "than", "that", "the",
+  "their", "them", "then", "there", "these", "they", "this", "to", "too",
+  "us", "very", "was", "we", "were", "what", "when", "where", "which", "who",
+  "why", "will", "with", "would", "you", "your",
 ]);
 
 /** Words whose trailing "s" belongs to the stem, not a plural. */

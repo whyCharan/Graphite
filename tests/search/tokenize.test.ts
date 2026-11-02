@@ -7,7 +7,7 @@ describe("tokenize", () => {
   });
 
   it("drops stop words that carry no retrieval signal", () => {
-    expect(tokenize("what did I decide about the schema")).toEqual(["decide", "about", "schema"]);
+    expect(tokenize("what did I decide about the schema")).toEqual(["decide", "schema"]);
   });
 
   it("splits slug titles, so a word inside a hyphenated note name is findable", () => {
