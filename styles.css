@@ -1,0 +1,179 @@
+/*
+ * Graphite panel.
+ *
+ * Every colour, font and radius comes from Obsidian's own theme variables, so
+ * the panel follows whatever theme the user runs rather than introducing a
+ * second visual language beside their notes.
+ */
+
+.graphite-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--size-4-2);
+  padding: var(--size-4-2);
+  /* The panel is usable from a 280px sidebar upward. */
+  min-width: 0;
+}
+
+.graphite-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-4-2);
+  flex: 0 0 auto;
+}
+
+.graphite-header-title {
+  font-weight: var(--font-semibold);
+  color: var(--text-normal);
+}
+
+.graphite-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--size-2-2);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.graphite-icon-button:hover {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+}
+
+.graphite-status:empty {
+  display: none;
+}
+
+.graphite-status {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.graphite-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.graphite-empty-lead {
+  color: var(--text-normal);
+  margin-bottom: var(--size-4-2);
+  text-wrap: pretty;
+}
+
+.graphite-note {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-bottom: var(--size-4-2);
+  text-wrap: pretty;
+}
+
+.graphite-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-1);
+}
+
+.graphite-result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--size-4-2);
+  background: transparent;
+  box-shadow: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  /* Long note paths and quotes wrap rather than scrolling sideways. */
+  min-width: 0;
+  white-space: normal;
+  height: auto;
+}
+
+.graphite-result:hover {
+  background: var(--background-modifier-hover);
+}
+
+.graphite-result:focus-visible {
+  /* Obsidian's own focus ring, never removed. */
+  border-color: var(--background-modifier-border-focus);
+  box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
+}
+
+.graphite-result-title {
+  color: var(--text-normal);
+  font-weight: var(--font-medium);
+  /*
+   * Vault note names are often hyphenated slugs with no spaces, which cannot
+   * break at a word boundary in a narrow sidebar.
+   */
+  overflow-wrap: anywhere;
+}
+
+.graphite-result-folder {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  overflow-wrap: anywhere;
+}
+
+.graphite-result-excerpt {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-top: var(--size-2-2);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.graphite-result-excerpt mark {
+  background: var(--text-highlight-bg);
+  color: inherit;
+  border-radius: var(--radius-s);
+}
+
+.graphite-result-reason {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  margin-top: var(--size-2-2);
+  overflow-wrap: anywhere;
+}
+
+.graphite-composer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--size-4-1);
+}
+
+.graphite-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.graphite-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.graphite-test-result:empty {
+  display: none;
+}
+
+.graphite-test-result {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-top: var(--size-4-1);
+}
+
+.graphite-test-result.graphite-test-error {
+  color: var(--text-error);
+}
