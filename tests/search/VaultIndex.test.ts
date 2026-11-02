@@ -23,7 +23,7 @@ describe("VaultIndex search", () => {
   });
 
   it("reports the terms it searched, so a no-match state can list them", () => {
-    expect(index.search("what did I decide about Groq").terms).toEqual(["decide", "about", "groq"]);
+    expect(index.search("what did I decide about Groq").terms).toEqual(["decide", "groq"]);
   });
 
   it("returns no notes and no terms for a query of only stop words", () => {
@@ -55,6 +55,37 @@ describe("VaultIndex search", () => {
     index.indexNote(note("Spread.md", "# One\ncaching matters\n\n# Two\ncaching again"));
     index.indexNote(note("Passing.md", `caching ${"filler ".repeat(200)}`));
     expect(index.search("caching").notes[0].notePath).toBe("Spread.md");
+  });
+});
+
+describe("VaultIndex relevance floor", () => {
+  it("says nothing matched when a note shares only one word of a longer question", () => {
+    const index = new VaultIndex();
+    index.indexNote(note("Retry policy.md", "Failed webhook deliveries retry with backoff."));
+
+    // "policy" is shared, "office" and "dogs" appear nowhere: the honest answer
+    // is that nothing matched, not a note about retries.
+    expect(index.search("policy office dogs").notes).toEqual([]);
+  });
+
+  it("still answers a single-word question from one matched term", () => {
+    const index = new VaultIndex();
+    index.indexNote(note("Retry policy.md", "Failed webhook deliveries retry with backoff."));
+    expect(index.search("retry").notes).toHaveLength(1);
+  });
+
+  it("keeps a note matching two terms of a long question", () => {
+    const index = new VaultIndex();
+    index.indexNote(note("Rate limiting.md", "Sixty requests per minute per API key."));
+    expect(index.search("how many requests per minute are allowed").notes).toHaveLength(1);
+  });
+
+  it("never requires more than two matched terms, so expansion cannot raise the bar", () => {
+    const index = new VaultIndex();
+    index.indexNote(note("Caching.md", "Tracking responses are cached at the edge."));
+    // An expanded question carries alternatives, not extra requirements.
+    const terms = ["cached", "edge", "memoize", "store", "buffer", "retain", "persist", "keep"];
+    expect(index.searchTerms(terms).notes).toHaveLength(1);
   });
 });
 

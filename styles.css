@@ -143,6 +143,147 @@
   overflow-wrap: anywhere;
 }
 
+/* Answer */
+
+.graphite-answer {
+  color: var(--text-normal);
+  margin-bottom: var(--size-4-3);
+}
+
+.graphite-claim {
+  margin-bottom: var(--size-4-2);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.graphite-citation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4em;
+  height: 1.4em;
+  margin-left: 0.3em;
+  padding: 0 0.35em;
+  font-size: var(--font-ui-smaller);
+  line-height: 1;
+  color: var(--text-accent);
+  background: var(--background-modifier-hover);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  box-shadow: none;
+  vertical-align: baseline;
+}
+
+.graphite-citation:hover {
+  color: var(--text-on-accent);
+  background: var(--interactive-accent);
+}
+
+/*
+ * The verified quote is the one accent in the panel: it is the proof, so it is
+ * the single element that looks different from everything around it.
+ */
+.graphite-quote {
+  margin: var(--size-4-2) 0 var(--size-4-2) 0;
+  padding: var(--size-4-2);
+  border-left: 3px solid var(--interactive-accent);
+  background: var(--background-secondary);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+}
+
+.graphite-quote-text {
+  color: var(--text-normal);
+  font-style: italic;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.graphite-quote-source {
+  margin-top: var(--size-2-2);
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-accent);
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.graphite-removed,
+.graphite-notice {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-bottom: var(--size-4-2);
+  padding: var(--size-4-2);
+  background: var(--background-secondary);
+  border-radius: var(--radius-s);
+  text-wrap: pretty;
+}
+
+.graphite-disclosure {
+  margin-bottom: var(--size-4-2);
+}
+
+.graphite-disclosure summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  padding: var(--size-2-2) 0;
+}
+
+.graphite-sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-1);
+}
+
+.graphite-source {
+  display: block;
+  width: 100%;
+  height: auto;
+  text-align: left;
+  white-space: normal;
+  padding: var(--size-4-2);
+  background: transparent;
+  box-shadow: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.graphite-source:hover {
+  background: var(--background-modifier-hover);
+}
+
+.graphite-source-title {
+  color: var(--text-normal);
+  overflow-wrap: anywhere;
+}
+
+.graphite-source-folder {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  overflow-wrap: anywhere;
+}
+
+.graphite-source-excerpt {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-top: var(--size-2-2);
+  overflow-wrap: anywhere;
+}
+
+.graphite-sent-text {
+  max-height: 18em;
+  overflow: auto;
+  padding: var(--size-4-2);
+  background: var(--background-secondary);
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smaller);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .graphite-composer {
   flex: 0 0 auto;
   display: flex;

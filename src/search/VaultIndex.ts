@@ -29,6 +29,20 @@ const ADDITIONAL_SECTION_WEIGHT = 0.15;
 const MAX_SNIPPETS_PER_NOTE = 3;
 
 /**
+ * Matched terms a note needs before it counts as a result.
+ *
+ * Without a floor, one shared common word is enough: "who won the table tennis
+ * tournament" matched a note about message queues on the word "won". Saying
+ * nothing matched is the honest answer, and criterion 3 requires it.
+ *
+ * Capped at two so an expanded question, whose extra terms are alternatives
+ * rather than requirements, is not made harder to satisfy.
+ */
+function requiredTermMatches(termCount: number): number {
+  return Math.max(1, Math.min(2, Math.ceil(termCount / 2)));
+}
+
+/**
  * The vault's search index: sections in BM25, grouped back into notes.
  *
  * Deliberately free of Obsidian imports (spec rule) so every ranking and
@@ -176,7 +190,9 @@ function groupByNote(
     else byNote.set(hit.section.notePath, [hit]);
   }
 
+  const required = requiredTermMatches(terms.length);
   const notes: NoteHit[] = [];
+
   for (const [notePath, hits] of byNote) {
     hits.sort((a, b) => b.score - a.score);
     const [best, ...rest] = hits;
@@ -184,6 +200,7 @@ function groupByNote(
 
     const matched = new Set<string>();
     for (const hit of hits) for (const term of hit.matchedTerms) matched.add(term);
+    if (matched.size < required) continue;
 
     notes.push({
       notePath,
