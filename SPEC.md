@@ -280,6 +280,7 @@ Targets 2 and 4 are proposed numbers. Adjust them if you want them stricter or l
 | Q1 | Folder exclusion in v0.1? | Yes (US-11). |
 | Q2 | Default provider and model | Groq is the default provider, because its free tier lets people use AI answers without paying. Anthropic defaults to `claude-haiku-5-5` (assumption, open to change). |
 | Q3 | Keyword expansion on by default? | Yes. |
+| Q4 | GitHub repository name and visibility | `whyCharan/Graphite`, public. Decided 2 November 2026, ahead of T18. |
 | Q5 | Anthropic's Citations API for the Anthropic provider? | No. One quote check for every provider. |
 | Q6 | Panel design direction | Native to Obsidian: theme variables, ENERGY 1 / RHYTHM 1 / MOTION 1, the verified-quote block as the one accent. |
 
@@ -287,7 +288,6 @@ Targets 2 and 4 are proposed numbers. Adjust them if you want them stricter or l
 
 | # | Question | When it's decided |
 |---|---|---|
-| Q4 | GitHub repository name and visibility | Release task (T18 in the plan) |
 | Q7 | Ribbon icon: a glyph from Obsidian's built-in Lucide set (for example `quote`), or a custom icon you provide | Release task (T18). Until then, a temporary built-in glyph, marked as temporary. |
 
 ---
